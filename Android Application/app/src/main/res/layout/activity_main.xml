@@ -119,6 +119,7 @@
 
         <!-- Menu item template -->
         <LinearLayout
+            android:id="@+id/navHome"
             android:layout_weight="1"
             android:gravity="center"
             android:orientation="vertical"
@@ -135,6 +136,7 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/navWishlist"
             android:layout_weight="1"
             android:gravity="center"
             android:orientation="vertical"

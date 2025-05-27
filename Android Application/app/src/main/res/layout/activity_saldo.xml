@@ -89,13 +89,18 @@
                 android:padding="10dp"/>
 
             <!-- Tombol Tambah -->
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnTambahSaldo"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
                 android:layout_marginTop="12dp"
                 android:text="Tambahkan"
-                android:textAllCaps="false"/>
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF"
+                android:fontFamily="sans-serif-medium"
+                android:elevation="4dp"
+                android:backgroundTint="#8E8E8E"
+                app:cornerRadius="8dp" />
 
             <!-- Gaya Quote -->
             <TextView
@@ -124,6 +129,7 @@
 
         <!-- Home -->
         <LinearLayout
+            android:id="@+id/navHome"
             android:layout_weight="1"
             android:gravity="center"
             android:orientation="vertical"
@@ -144,6 +150,7 @@
 
         <!-- Wishlist -->
         <LinearLayout
+            android:id="@+id/navWishlist"
             android:layout_weight="1"
             android:gravity="center"
             android:orientation="vertical"
@@ -164,6 +171,7 @@
 
         <!-- Budgeting -->
         <LinearLayout
+            android:id="@+id/navBudgeting"
             android:layout_weight="1"
             android:gravity="center"
             android:orientation="vertical"
@@ -184,6 +192,7 @@
 
         <!-- Profile -->
         <LinearLayout
+            android:id="@+id/navProfile"
             android:layout_weight="1"
             android:gravity="center"
             android:orientation="vertical"

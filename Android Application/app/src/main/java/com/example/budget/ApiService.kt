@@ -1,9 +1,9 @@
 package com.example.budget
 
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.Call
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.POST
+import retrofit2.http.*
 
 // Request untuk registrasi
 data class RegisterRequest(
@@ -46,7 +46,7 @@ data class UserData(
     val id: Int,
     val username: String,
     val email: String,
-    val saldo: String,      // saldo berupa string "0.00" sesuai contoh JSON
+    val saldo: String,      // saldo berupa string "0.00"
     val pekerjaan: String?
 )
 
@@ -62,8 +62,9 @@ data class Item(
     val kategori: String,
     val harga: Int,
     val deskripsi: String,
-    val gambar: String // kalau ada kolom gambar
+    val gambar: String
 )
+
 data class WishlistRequest(
     val nama: String,
     val harga: Int,
@@ -87,7 +88,7 @@ data class WishlistItem(
     val harga: Int,
     val gambar: String
 )
-
+data class BeliHapusRequest(val wishlist_id: Int)
 
 // Interface API Retrofit
 interface ApiService {
@@ -108,15 +109,25 @@ interface ApiService {
 
     @POST("user/saldo")
     fun updateSaldo(@Body saldo: Map<String, String>): Call<RegisterResponse>
-    // Ambil wishlist user (butuh token)
-    @GET("wishlist")
+
+    @GET("wishlists")
     fun getWishlist(): Call<List<WishlistItem>>
 
-    // Tambah wishlist (butuh token)
-    @POST("wishlist")
+    @POST("wishlists")
     fun addToWishlist(@Body request: WishlistRequest): Call<DefaultResponse>
 
-    // Beli item (butuh token)
-    @POST("beli")
+    @POST("wishlists/beli-hapus")
+    fun beliDanHapus(@Body request: BeliHapusRequest): Call<DefaultResponse>
+
+    @POST("wishlists/beli")
     fun beliItem(@Body request: BeliRequest): Call<DefaultResponse>
+
+    @Multipart
+    @POST("wishlists/upload")
+    fun uploadWishlist(
+        @Part("nama") nama: RequestBody,
+        @Part("harga") harga: RequestBody,
+        @Part gambar: MultipartBody.Part
+    ): Call<DefaultResponse>
+
 }

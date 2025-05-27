@@ -4,37 +4,27 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
-import android.widget.*
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.budget.databinding.ActivityMainBinding
+import com.example.budget.databinding.ActivityProfileBinding
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
 class ProfileActivity : AppCompatActivity() {
 
-    private lateinit var etNama: EditText
-    private lateinit var etEmail: EditText
-    private lateinit var etPekerjaan: EditText
-    private lateinit var tvNamaKotak: TextView
-    private lateinit var tvEmailKotak: TextView
-    private lateinit var btnSimpan: Button
+    private lateinit var binding: ActivityProfileBinding
     private lateinit var api: ApiService
     private lateinit var sharedPref: SharedPreferences
-    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_profile)
-        // Inisialisasi View
-        etNama = findViewById(R.id.etNama)
-        etEmail = findViewById(R.id.etEmail)
-        etPekerjaan = findViewById(R.id.etPekerjaan)
-        tvNamaKotak = findViewById(R.id.tvNamaKotak)
-        tvEmailKotak = findViewById(R.id.tvEmailKotak)
-        btnSimpan = findViewById(R.id.btnSimpan)
 
-        // Ambil token dari SharedPreferences
+        // Inisialisasi binding dan set content view
+        binding = ActivityProfileBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        // Inisialisasi SharedPreferences dan Retrofit API dengan token
         sharedPref = getSharedPreferences("user_session", MODE_PRIVATE)
         val token = sharedPref.getString("token", "") ?: ""
         api = RetrofitClient.getInstance(token)
@@ -42,18 +32,21 @@ class ProfileActivity : AppCompatActivity() {
         // Load profile saat activity mulai
         getProfile()
 
-        // Simpan perubahan
-        btnSimpan.setOnClickListener {
-            updateProfile()
-        }
         binding.navProfile.setOnClickListener {
-            val intent = Intent(this, ProfileActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, ProfileActivity::class.java))
         }
-
         binding.navBudgeting.setOnClickListener {
-            val intent = Intent(this, SaldoActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, SaldoActivity::class.java))
+        }
+        binding.navHome.setOnClickListener {
+            startActivity(Intent(this, MainActivity::class.java))
+        }
+        binding.navWishlist.setOnClickListener {
+            startActivity(Intent(this, WishlistActivity::class.java))
+        }
+        // Simpan perubahan saat tombol diklik
+        binding.btnSimpan.setOnClickListener {
+            updateProfile()
         }
     }
 
@@ -64,15 +57,14 @@ class ProfileActivity : AppCompatActivity() {
                     val apiResponse = response.body()
                     if (apiResponse != null && apiResponse.status && apiResponse.data != null) {
                         val user = apiResponse.data
-
                         Log.d("ProfileActivity", "User loaded: ${user.username}, ${user.email}, ${user.pekerjaan}")
 
-                        // Tampilkan ke UI
-                        tvNamaKotak.text = user.username
-                        tvEmailKotak.text = user.email
-                        etNama.setText(user.username)
-                        etEmail.setText(user.email)
-                        etPekerjaan.setText(user.pekerjaan ?: "")
+                        // Tampilkan data ke UI via binding
+                        binding.tvNamaKotak.text = user.username
+                        binding.tvEmailKotak.text = user.email
+                        binding.etNama.setText(user.username)
+                        binding.etEmail.setText(user.email)
+                        binding.etPekerjaan.setText(user.pekerjaan ?: "")
                     } else {
                         Toast.makeText(this@ProfileActivity, "Data tidak ditemukan", Toast.LENGTH_SHORT).show()
                     }
@@ -89,9 +81,9 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun updateProfile() {
-        val nama = etNama.text.toString().trim()
-        val email = etEmail.text.toString().trim()
-        val pekerjaan = etPekerjaan.text.toString().trim()
+        val nama = binding.etNama.text.toString().trim()
+        val email = binding.etEmail.text.toString().trim()
+        val pekerjaan = binding.etPekerjaan.text.toString().trim()
 
         if (nama.isBlank() || email.isBlank() || pekerjaan.isBlank()) {
             Toast.makeText(this, "Nama, email, dan pekerjaan wajib diisi", Toast.LENGTH_SHORT).show()

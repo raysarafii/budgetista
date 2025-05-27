@@ -28,11 +28,17 @@ class MainActivity : AppCompatActivity() {
         binding.navProfile.setOnClickListener {
             startActivity(Intent(this, ProfileActivity::class.java))
         }
-
         binding.navBudgeting.setOnClickListener {
             startActivity(Intent(this, SaldoActivity::class.java))
         }
+        binding.navHome.setOnClickListener {
+            startActivity(Intent(this, MainActivity::class.java))
+        }
+        binding.navWishlist.setOnClickListener {
+            startActivity(Intent(this, WishlistActivity::class.java))
+        }
     }
+
 
     private fun getToken(): String {
         val sharedPref = getSharedPreferences("user_session", MODE_PRIVATE)

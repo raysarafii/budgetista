@@ -3,53 +3,52 @@ package com.example.budget
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.widget.*
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.budget.databinding.ActivityMainBinding
+import com.example.budget.databinding.ActivitySaldoBinding
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
 class SaldoActivity : AppCompatActivity() {
 
-    private lateinit var tvSaldo: TextView
-    private lateinit var etTambahSaldo: EditText
-    private lateinit var btnTambahSaldo: Button
+    private lateinit var binding: ActivitySaldoBinding
     private lateinit var api: ApiService
     private lateinit var sharedPref: SharedPreferences
-    private lateinit var binding: ActivityMainBinding
     private var currentSaldo: Double = 0.0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_saldo)
 
-        tvSaldo = findViewById(R.id.tvSaldo)
-        etTambahSaldo = findViewById(R.id.etTambahSaldo)
-        btnTambahSaldo = findViewById(R.id.btnTambahSaldo)
+        // Inisialisasi binding sesuai nama layout
+        binding = ActivitySaldoBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         sharedPref = getSharedPreferences("user_session", MODE_PRIVATE)
         val token = sharedPref.getString("token", "") ?: ""
         api = RetrofitClient.getInstance(token)
 
         loadSaldo()
+        binding.navProfile.setOnClickListener {
+            startActivity(Intent(this, ProfileActivity::class.java))
+        }
+        binding.navBudgeting.setOnClickListener {
+            startActivity(Intent(this, SaldoActivity::class.java))
+        }
+        binding.navHome.setOnClickListener {
+            startActivity(Intent(this, MainActivity::class.java))
+        }
+        binding.navWishlist.setOnClickListener {
+            startActivity(Intent(this, WishlistActivity::class.java))
+        }
 
-        btnTambahSaldo.setOnClickListener {
-            val tambahan = etTambahSaldo.text.toString().toDoubleOrNull()
+        binding.btnTambahSaldo.setOnClickListener {
+            val tambahan = binding.etTambahSaldo.text.toString().toDoubleOrNull()
             if (tambahan != null && tambahan > 0) {
                 updateSaldo(currentSaldo + tambahan)
             } else {
                 Toast.makeText(this, "Masukkan jumlah yang valid", Toast.LENGTH_SHORT).show()
             }
-        }
-        binding.navProfile.setOnClickListener {
-            val intent = Intent(this, ProfileActivity::class.java)
-            startActivity(intent)
-        }
-
-        binding.navBudgeting.setOnClickListener {
-            val intent = Intent(this, SaldoActivity::class.java)
-            startActivity(intent)
         }
     }
 
@@ -59,7 +58,7 @@ class SaldoActivity : AppCompatActivity() {
                 if (response.isSuccessful) {
                     val user = response.body()?.data
                     currentSaldo = user?.saldo?.toDoubleOrNull() ?: 0.0
-                    tvSaldo.text = "Rp. %.2f".format(currentSaldo)
+                    binding.tvSaldo.text = "Rp. %.2f".format(currentSaldo)
                 } else {
                     Toast.makeText(this@SaldoActivity, "Gagal mengambil saldo", Toast.LENGTH_SHORT).show()
                 }
@@ -79,7 +78,7 @@ class SaldoActivity : AppCompatActivity() {
                 if (response.isSuccessful && response.body()?.status == true) {
                     Toast.makeText(this@SaldoActivity, "Saldo diperbarui", Toast.LENGTH_SHORT).show()
                     loadSaldo()
-                    etTambahSaldo.text.clear()
+                    binding.etTambahSaldo.text.clear()
                 } else {
                     Toast.makeText(this@SaldoActivity, "Gagal memperbarui saldo", Toast.LENGTH_SHORT).show()
                 }

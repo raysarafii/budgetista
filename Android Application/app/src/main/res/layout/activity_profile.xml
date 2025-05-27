@@ -171,7 +171,7 @@
                 android:textColor="#FFFFFF"
                 android:fontFamily="sans-serif-medium"
                 android:elevation="4dp"
-                android:backgroundTint="#007AFF"
+                android:backgroundTint="#8E8E8E"
                 app:cornerRadius="8dp" />
 
         </LinearLayout>
@@ -192,6 +192,7 @@
 
         <!-- Home -->
         <LinearLayout
+            android:id="@+id/navHome"
             android:layout_weight="1"
             android:gravity="center"
             android:orientation="vertical"
@@ -212,6 +213,7 @@
 
         <!-- Wishlist -->
         <LinearLayout
+            android:id="@+id/navWishlist"
             android:layout_weight="1"
             android:gravity="center"
             android:orientation="vertical"
@@ -232,6 +234,7 @@
 
         <!-- Budgeting -->
         <LinearLayout
+            android:id="@+id/navBudgeting"
             android:layout_weight="1"
             android:gravity="center"
             android:orientation="vertical"
@@ -252,6 +255,7 @@
 
         <!-- Profile -->
         <LinearLayout
+            android:id="@+id/navProfile"
             android:layout_weight="1"
             android:gravity="center"
             android:orientation="vertical"

@@ -11,6 +11,7 @@ import com.bumptech.glide.Glide
 
 class WishlistAdapter(
     private val list: List<WishlistItem>,
+    private val saldoUser: Int,
     private val onBuyClick: (WishlistItem) -> Unit
 ) : RecyclerView.Adapter<WishlistAdapter.ViewHolder>() {
 
@@ -37,8 +38,13 @@ class WishlistAdapter(
             .load(fullUrl)
             .into(holder.gambar)
 
-        holder.btnBuy.setOnClickListener {
-            onBuyClick(item)
+        if (item.harga > saldoUser) {
+            holder.btnBuy.visibility = View.GONE
+        } else {
+            holder.btnBuy.visibility = View.VISIBLE
+            holder.btnBuy.setOnClickListener {
+                onBuyClick(item)
+            }
         }
     }
 

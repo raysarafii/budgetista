@@ -122,4 +122,39 @@ class WishlistController extends Controller
             'data' => $wishlist
         ]);
     }
+    public function beliwishlist(Request $request)
+{
+    $request->validate([
+        'wishlist_id' => 'required|integer',
+    ]);
+
+    $user = Auth::guard('api')->user();
+    $wishlist = Wishlist::where('id', $request->wishlist_id)
+                        ->where('user_id', $user->id)
+                        ->first();
+
+    if (!$wishlist) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Item wishlist tidak ditemukan'
+        ], 404);
+    }
+
+    if ($user->saldo < $wishlist->harga) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Saldo tidak cukup'
+        ]);
+    }
+
+    $user->saldo -= $wishlist->harga;
+    $user->save();
+    $wishlist->delete();
+
+    return response()->json([
+        'status' => true,
+        'message' => 'Item berhasil dibeli dan dihapus dari wishlist',
+    ]);
+}
+
 }

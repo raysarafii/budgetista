@@ -19,9 +19,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/wishlists', [WishlistController::class, 'index']);
     Route::post('/wishlists', [WishlistController::class, 'store']);
     Route::post('/wishlists/beli', [WishlistController::class, 'beli']);
-    Route::get('/wishlists/status', [WishlistController::class, 'showByStatus']);  // <-- tambahkan titik koma di sini
-
-    // Tambahkan route untuk upload gambar wishlist
+    Route::get('/wishlists/status', [WishlistController::class, 'showByStatus']);
+    Route::post('wishlists/beli-hapus', [WishlistController::class, 'beliwishlist']);
     Route::post('/wishlists/upload', [WishlistController::class, 'uploadGambar']);
 });
 

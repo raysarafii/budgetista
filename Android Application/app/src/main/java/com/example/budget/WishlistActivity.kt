@@ -39,6 +39,7 @@ class WishlistActivity : AppCompatActivity() {
         binding = ActivityWishlistBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Ambil token dari shared preferences
         val sharedPref = getSharedPreferences("user_session", MODE_PRIVATE)
         token = sharedPref.getString("token", "") ?: ""
         api = RetrofitClient.getInstance(token)
@@ -147,14 +148,15 @@ class WishlistActivity : AppCompatActivity() {
 
                         findViewById<RecyclerView>(R.id.rvBisaDibeli).apply {
                             layoutManager = LinearLayoutManager(this@WishlistActivity, LinearLayoutManager.HORIZONTAL, false)
-                            adapter = WishlistAdapter(bisaDibeli, saldoUser) { item ->
+                            adapter = WishlistAdapter(bisaDibeli) { item ->
                                 beliItem(item)
                             }
                         }
 
                         findViewById<RecyclerView>(R.id.rvTidakBisa).apply {
                             layoutManager = LinearLayoutManager(this@WishlistActivity, LinearLayoutManager.HORIZONTAL, false)
-                            adapter = WishlistAdapter(tidakBisa, saldoUser) {
+                            adapter = WishlistAdapter(tidakBisa) {
+
                             }
                         }
                     }
@@ -188,4 +190,5 @@ class WishlistActivity : AppCompatActivity() {
             }
         })
     }
+
 }

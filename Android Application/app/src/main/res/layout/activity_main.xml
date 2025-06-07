@@ -74,7 +74,7 @@
 
             <!-- Section Populer -->
             <TextView
-                android:text="Populer"
+                android:text="Item wishlist-mu yang kini sudah masuk dalam jangkauan dompet"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="#212121"
@@ -88,9 +88,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="24dp" />
 
-            <!-- Section Untuk Anda -->
+            <!-- Section  -->
             <TextView
-                android:text="Untuk Anda"
+                android:text="Masih Dalam Penantian"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="#212121"

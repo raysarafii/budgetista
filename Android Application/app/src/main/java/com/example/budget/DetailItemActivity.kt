@@ -1,18 +1,31 @@
 package com.example.budget
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
 import com.example.budget.databinding.ActivityDetailItemBinding
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 
 class DetailItemActivity : AppCompatActivity() {
     private lateinit var binding: ActivityDetailItemBinding
     private lateinit var token: String
     private val baseUrl = "http://192.168.0.103:8000/"
+    private var gambarPath: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,18 +39,19 @@ class DetailItemActivity : AppCompatActivity() {
         val harga = intent.getIntExtra("harga", 0)
         val deskripsi = intent.getStringExtra("deskripsi")
         val gambar = intent.getStringExtra("gambar") ?: ""
+        gambarPath = gambar
 
         binding.tvNama.text = nama
         binding.tvKategori.text = kategori
         binding.tvHarga.text = "Rp $harga"
         binding.tvDeskripsi.text = deskripsi
 
-        // Load gambar dengan base URL + path relatif
+        // Tampilkan gambar
         Glide.with(this).load(baseUrl + gambar).into(binding.ivGambar)
 
         binding.btnWishlist.setOnClickListener {
             if (token.isNotEmpty()) {
-                addToWishlist(nama ?: "", harga, gambar)  // Kirim path relatif ke API
+                addToWishlist(nama ?: "", harga, gambar)
             } else {
                 Toast.makeText(this, "Silakan login terlebih dahulu", Toast.LENGTH_SHORT).show()
             }
@@ -48,6 +62,18 @@ class DetailItemActivity : AppCompatActivity() {
                 beliItem(nama ?: "", harga)
             } else {
                 Toast.makeText(this, "Silakan login terlebih dahulu", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        binding.btnDownload.setOnClickListener {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1001)
+                } else {
+                    downloadImage(gambarPath)
+                }
+            } else {
+                downloadImage(gambarPath)
             }
         }
     }
@@ -61,7 +87,7 @@ class DetailItemActivity : AppCompatActivity() {
                 override fun onResponse(call: Call<DefaultResponse>, response: Response<DefaultResponse>) {
                     if (response.isSuccessful && response.body()?.status == true) {
                         Toast.makeText(this@DetailItemActivity, response.body()?.message ?: "Berhasil ditambahkan ke wishlist", Toast.LENGTH_SHORT).show()
-                        finish()  // Kembali ke MainActivity setelah sukses
+                        finish()
                     } else {
                         Toast.makeText(this@DetailItemActivity, "Gagal menambahkan ke wishlist", Toast.LENGTH_SHORT).show()
                     }
@@ -82,7 +108,7 @@ class DetailItemActivity : AppCompatActivity() {
                 override fun onResponse(call: Call<DefaultResponse>, response: Response<DefaultResponse>) {
                     if (response.isSuccessful && response.body()?.status == true) {
                         Toast.makeText(this@DetailItemActivity, response.body()?.message ?: "Berhasil membeli item", Toast.LENGTH_SHORT).show()
-                        finish()  // Kembali ke MainActivity setelah sukses
+                        finish()
                     } else {
                         Toast.makeText(this@DetailItemActivity, "Gagal membeli item", Toast.LENGTH_SHORT).show()
                     }
@@ -92,5 +118,48 @@ class DetailItemActivity : AppCompatActivity() {
                     Toast.makeText(this@DetailItemActivity, "Gagal: ${t.message}", Toast.LENGTH_SHORT).show()
                 }
             })
+    }
+
+    private fun downloadImage(gambar: String) {
+        val url = baseUrl + gambar
+        Glide.with(this)
+            .asBitmap()
+            .load(url)
+            .into(object : CustomTarget<Bitmap>() {
+                override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                    saveImage(resource, gambar.substringAfterLast("/"))
+                }
+
+                override fun onLoadCleared(placeholder: android.graphics.drawable.Drawable?) {}
+            })
+    }
+
+    private fun saveImage(bitmap: Bitmap, fileName: String) {
+        val directory = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        } else {
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+        }
+
+        val file = File(directory, fileName)
+        try {
+            val outputStream = FileOutputStream(file)
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+            outputStream.flush()
+            outputStream.close()
+            Toast.makeText(this, "Gambar disimpan di ${file.absolutePath}", Toast.LENGTH_LONG).show()
+        } catch (e: IOException) {
+            e.printStackTrace()
+            Toast.makeText(this, "Gagal menyimpan gambar", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 1001 && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            downloadImage(gambarPath)
+        } else {
+            Toast.makeText(this, "Izin ditolak", Toast.LENGTH_SHORT).show()
+        }
     }
 }

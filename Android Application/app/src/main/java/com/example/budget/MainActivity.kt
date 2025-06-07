@@ -16,15 +16,17 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Layout horizontal untuk dua RecyclerView
         binding.rvPopuler.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         binding.rvUntukAnda.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
 
-        loadItems()
+        // Load data
+        loadUserAndItems()
 
+        // Navigasi
         binding.navProfile.setOnClickListener {
             startActivity(Intent(this, ProfileActivity::class.java))
         }
@@ -39,38 +41,63 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
     private fun getToken(): String {
         val sharedPref = getSharedPreferences("user_session", MODE_PRIVATE)
         return sharedPref.getString("token", "") ?: ""
     }
 
-    private fun loadItems() {
+    private fun loadUserAndItems() {
+        val token = getToken()
+        val api = RetrofitClient.getInstance(token)
+
+        api.getProfile().enqueue(object : Callback<ApiResponseUser> {
+            override fun onResponse(call: Call<ApiResponseUser>, response: Response<ApiResponseUser>) {
+                if (response.isSuccessful) {
+                    val user = response.body()?.data
+                    val saldoString = user?.saldo ?: "0.00"
+                    val saldo = saldoString.toDoubleOrNull()?.toInt() ?: 0
+                    loadItemsWithSaldo(saldo)
+                } else {
+                    Log.e("MainActivity", "Gagal ambil profil: ${response.code()}")
+                }
+            }
+
+            override fun onFailure(call: Call<ApiResponseUser>, t: Throwable) {
+                Log.e("MainActivity", "Error ambil profil: ${t.message}")
+            }
+        })
+    }
+
+    private fun loadItemsWithSaldo(saldo: Int) {
         RetrofitClient.instance.getItems().enqueue(object : Callback<List<Item>> {
             override fun onResponse(call: Call<List<Item>>, response: Response<List<Item>>) {
                 if (response.isSuccessful) {
                     val items = response.body() ?: emptyList()
-                    val shuffled = items.shuffled()
-                    val half = shuffled.size / 2
 
-                    binding.rvPopuler.adapter = ItemAdapter(shuffled.take(half)) { item ->
+                    val itemPopuler = items.filter { it.harga <= saldo }
+                    val itemUntukAnda = items.filter { it.harga > saldo }
+
+                    binding.rvPopuler.adapter = ItemAdapter(itemPopuler) { item ->
                         openDetailItem(item)
                     }
-                    binding.rvUntukAnda.adapter = ItemAdapter(shuffled.drop(half)) { item ->
+
+                    binding.rvUntukAnda.adapter = ItemAdapter(itemUntukAnda) { item ->
                         openDetailItem(item)
                     }
+
+                } else {
+                    Log.e("MainActivity", "Gagal ambil item: ${response.code()}")
                 }
             }
 
             override fun onFailure(call: Call<List<Item>>, t: Throwable) {
-                Log.e("MainActivity", "Error: ${t.message}")
+                Log.e("MainActivity", "Error ambil item: ${t.message}")
             }
         })
     }
 
     private fun openDetailItem(item: Item) {
         val token = getToken()
-
         val intent = Intent(this, DetailItemActivity::class.java).apply {
             putExtra("nama", item.nama)
             putExtra("kategori", item.kategori)

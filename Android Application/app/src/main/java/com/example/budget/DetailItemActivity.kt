@@ -1,6 +1,7 @@
 package com.example.budget
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Build
@@ -45,6 +46,19 @@ class DetailItemActivity : AppCompatActivity() {
         binding.tvKategori.text = kategori
         binding.tvHarga.text = "Rp $harga"
         binding.tvDeskripsi.text = deskripsi
+
+        binding.navProfile.setOnClickListener {
+            startActivity(Intent(this, ProfileActivity::class.java))
+        }
+        binding.navBudgeting.setOnClickListener {
+            startActivity(Intent(this, SaldoActivity::class.java))
+        }
+        binding.navHome.setOnClickListener {
+            startActivity(Intent(this, MainActivity::class.java))
+        }
+        binding.navWishlist.setOnClickListener {
+            startActivity(Intent(this, WishlistActivity::class.java))
+        }
 
         // Tampilkan gambar
         Glide.with(this).load(baseUrl + gambar).into(binding.ivGambar)
